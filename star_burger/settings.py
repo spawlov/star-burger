@@ -18,8 +18,6 @@ DEBUG = env.bool('DEBUG', True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
 
 INSTALLED_APPS = [
-    'foodcartapp.apps.FoodcartappConfig',
-    'restaurateur.apps.RestaurateurConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,6 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'phonenumber_field',
+
+    'foodcartapp.apps.FoodcartappConfig',
+    'restaurateur.apps.RestaurateurConfig',
 ]
 
 MIDDLEWARE = [
