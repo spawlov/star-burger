@@ -4,3 +4,4 @@ Pillow==9.4.0
 environs[django]==9.5.0
 django-phonenumber-field[phonenumberslite]==7.0.2
 django-phonenumbers==1.0.1
+djangorestframework==3.14.0

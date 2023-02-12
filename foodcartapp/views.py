@@ -2,7 +2,7 @@ import json
 
 from django.http import JsonResponse
 from django.templatetags.static import static
-
+from rest_framework.decorators import api_view
 
 from .models import Product, Order, ProductOrder
 
@@ -59,25 +59,24 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
     if request.method == 'POST':
-        order_data = json.loads(request.body.decode())
+        order_data = request.data
 
-        order, created = Order.objects.get_or_create(
+        order = Order.objects.create(
             first_name=order_data['firstname'],
             last_name=order_data['lastname'],
             phone=order_data['phonenumber'],
             address=order_data['address']
         )
 
-        if created:
-            print(order)
-            for position in order_data['products']:
-                product = Product.objects.get(pk=position['product'])
-                product_order = ProductOrder.objects.create(
-                    order=order,
-                    product=product,
-                    quantity=position['quantity']
-                )
-
+        for position in order_data['products']:
+            product = Product.objects.get(pk=position['product'])
+            ProductOrder.objects.create(
+                order=order,
+                product=product,
+                quantity=position['quantity']
+            )
+        print(order_data)
     return JsonResponse({})
