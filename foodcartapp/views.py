@@ -62,6 +62,7 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
+
     if request.method == 'POST':
         order_data = request.data
         serializer = OrderSerializer(data=order_data)
@@ -80,4 +81,6 @@ def register_order(request):
         ]
         ProductOrder.objects.bulk_create(order_products)
 
-        return Response({'order': order.id}, status=status.HTTP_201_CREATED)
+        serializer = OrderSerializer(order)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

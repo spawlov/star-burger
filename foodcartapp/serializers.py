@@ -10,17 +10,15 @@ class ProductOrderSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = serializers.ListField(
-        child=ProductOrderSerializer(),
-        allow_empty=False,
-    )
+    products = ProductOrderSerializer(many=True, write_only=True)
 
     class Meta:
         model = Order
         fields = [
+            'id',
             'products',
             'firstname',
             'lastname',
             'phonenumber',
             'address'
-        ]
+            ]
