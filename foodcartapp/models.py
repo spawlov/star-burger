@@ -125,15 +125,15 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
-    first_name = models.CharField(
+    firstname = models.CharField(
         max_length=20,
         verbose_name='имя',
     )
-    last_name = models.CharField(
+    lastname = models.CharField(
         max_length=20,
         verbose_name='фамилия',
     )
-    phone = PhoneNumberField(
+    phonenumber = PhoneNumberField(
         region='RU',
         verbose_name='телефон',
     )
@@ -151,9 +151,9 @@ class Order(models.Model):
         verbose_name_plural = 'заказы'
         indexes = [
             models.Index(fields=[
-                'phone',
-                'first_name',
-                'last_name',
+                'phonenumber',
+                'firstname',
+                'lastname',
                 'address'
                 ]
             )

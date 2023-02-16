@@ -123,16 +123,16 @@ class ProductOrderInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
         'created',
-        'first_name',
-        'last_name',
-        'phone',
+        'firstname',
+        'lastname',
+        'phonenumber',
         'address'
     ]
     list_display_links = [
         'created',
-        'first_name',
-        'last_name',
-        'phone',
+        'firstname',
+        'lastname',
+        'phonenumber',
         'address'
     ]
     readonly_fields = ['created']
