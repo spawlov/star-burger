@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Product, ProductOrder, Order
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, OrderSerializerResponse
 
 
 def banners_list_api(request):
@@ -81,6 +81,6 @@ def register_order(request):
         ]
         ProductOrder.objects.bulk_create(order_products)
 
-        serializer = OrderSerializer(order)
+        created_order = OrderSerializerResponse(order)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(created_order.data, status=status.HTTP_201_CREATED)

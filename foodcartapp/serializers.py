@@ -8,9 +8,12 @@ class ProductOrderSerializer(serializers.ModelSerializer):
         model = ProductOrder
         fields = ['product', 'quantity']
 
+    def to_representation(self, products):
+        return {'product': products.product.id, 'quantity': products.quantity}
+
 
 class OrderSerializer(serializers.ModelSerializer):
-    products = ProductOrderSerializer(many=True, write_only=True)
+    products = ProductOrderSerializer(many=True)
 
     class Meta:
         model = Order
@@ -21,4 +24,19 @@ class OrderSerializer(serializers.ModelSerializer):
             'lastname',
             'phonenumber',
             'address'
-            ]
+        ]
+
+
+class OrderSerializerResponse(serializers.ModelSerializer):
+    products = ProductOrderSerializer(source='order', many=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'products',
+            'firstname',
+            'lastname',
+            'phonenumber',
+            'address'
+        ]
