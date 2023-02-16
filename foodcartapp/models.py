@@ -131,7 +131,6 @@ class Order(models.Model):
     )
     last_name = models.CharField(
         max_length=20,
-        blank=True,
         verbose_name='фамилия',
     )
     phone = PhoneNumberField(

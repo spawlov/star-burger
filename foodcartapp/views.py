@@ -1,5 +1,7 @@
 import json
 
+import phonenumbers
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework import status
@@ -67,9 +69,14 @@ def register_order(request):
         order_data = request.data
         try:
             products = order_data['products']
-        except KeyError:
+            firstname = order_data['firstname']
+            lastname = order_data['lastname']
+            phonenumber = order_data['phonenumber']
+            address = order_data['address']
+        except KeyError as e:
+            key_name = str(e).replace("'", '')
             return Response(
-                {'error': 'products: Обязательное поле.'},
+                {'error': f'{key_name}: Обязательное поле.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         else:
@@ -78,30 +85,118 @@ def register_order(request):
                     {'error': 'products: Это поле не может быть пустым.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if firstname is None:
+                return Response(
+                    {'error': 'firstname: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if lastname is None:
+                return Response(
+                    {'error': 'lastname: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if phonenumber is None:
+                return Response(
+                    {'error': 'phonenumber: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if address is None:
+                return Response(
+                    {'error': 'address: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             if not isinstance(products, list):
                 return Response(
                     {'error': 'products: Ожидался list со значениями'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            if not isinstance(firstname, str):
+                return Response(
+                    {'error': 'firstname: Ожидалась строка со значением'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not isinstance(lastname, str):
+                return Response(
+                    {'error': 'lastname: Ожидалась строка со значением'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not isinstance(phonenumber, str):
+                return Response(
+                    {'error': 'phonenumber: Ожидалась строка со значением'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not isinstance(address, str):
+                return Response(
+                    {'error': 'address: Ожидалась строка со значением'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             if not len(products):
                 return Response(
                     {'error': 'products: Этот список не может быть пустым.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            order = Order.objects.create(
-                first_name=order_data['firstname'],
-                last_name=order_data['lastname'],
-                phone=order_data['phonenumber'],
-                address=order_data['address']
-            )
-
-            for position in order_data['products']:
-                product = Product.objects.get(pk=position['product'])
-                ProductOrder.objects.create(
-                    order=order,
-                    product=product,
-                    quantity=position['quantity']
+            if not firstname:
+                return Response(
+                    {'error': 'firstname: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
+            if not lastname:
+                return Response(
+                    {'error': 'lastname: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not phonenumber:
+                return Response(
+                    {'error': 'phonenumber: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not address:
+                return Response(
+                    {'error': 'address: Это поле не может быть пустым.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if not phonenumbers.is_valid_number(
+                phonenumbers.parse(phonenumber, 'RU')
+            ):
+                return Response(
+                    {
+                        'error':
+                            'phonenumber: Введен некорректный номер телефона.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            product = {}
+            try:
+                for product in products:
+                    Product.objects.get(pk=product['product'])
+            except ObjectDoesNotExist:
+                product_key = product['product']
+                return Response(
+                    {
+                        'error':
+                            f'products: '
+                            f'Недопустимый первичный ключ {product_key}'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        order = Order.objects.create(
+            first_name=order_data['firstname'],
+            last_name=order_data['lastname'],
+            phone=order_data['phonenumber'],
+            address=order_data['address']
+        )
+
+        for position in products:
+            product = Product.objects.get(pk=position['product'])
+            ProductOrder.objects.create(
+                order=order,
+                product=product,
+                quantity=position['quantity']
+            )
 
     return Response({}, status=status.HTTP_201_CREATED)
