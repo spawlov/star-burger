@@ -127,14 +127,16 @@ class OrderAdmin(admin.ModelAdmin):
         'firstname',
         'lastname',
         'phonenumber',
-        'address'
+        'address',
+        'status'
     ]
     list_display_links = [
         'created',
         'firstname',
         'lastname',
         'phonenumber',
-        'address'
+        'address',
+        'status'
     ]
     readonly_fields = ['created']
     inlines = [
