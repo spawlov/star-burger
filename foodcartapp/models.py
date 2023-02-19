@@ -128,6 +128,7 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
     def get_price(self):
         return (self
+                .filter(status='PROCESSED')
                 .select_related()
                 .annotate(
                     price=Sum(
@@ -139,6 +140,16 @@ class OrderQuerySet(models.QuerySet):
 
 
 class Order(models.Model):
+    status = (
+        ('PROCESSED', 'Необработан'),
+        ('COMPLETED', 'Завершен'),
+    )
+    status = models.CharField(
+        max_length=9,
+        choices=status,
+        default='PROCESSED',
+        verbose_name='статус заказа',
+    )
     firstname = models.CharField(
         max_length=20,
         verbose_name='имя',
@@ -170,7 +181,8 @@ class Order(models.Model):
                 'phonenumber',
                 'firstname',
                 'lastname',
-                'address'
+                'address',
+                'status'
             ]
             )
         ]
