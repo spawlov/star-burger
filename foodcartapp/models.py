@@ -166,14 +166,24 @@ class Order(models.Model):
         max_length=128,
         verbose_name='адрес доставки'
     )
-    created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='создан',
-    )
     comment = models.TextField(
         max_length=250,
         blank=True,
         verbose_name='комментарий',
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='создан',
+    )
+    called = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='звонок клиенту',
+    )
+    completed = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name='доставлен',
     )
 
     objects = OrderQuerySet.as_manager()
@@ -187,7 +197,9 @@ class Order(models.Model):
                 'firstname',
                 'lastname',
                 'address',
-                'status'
+                'status',
+                'called',
+                'completed'
             ]
             )
         ]
