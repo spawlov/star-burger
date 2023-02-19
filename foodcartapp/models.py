@@ -131,9 +131,9 @@ class OrderQuerySet(models.QuerySet):
                 .select_related()
                 .annotate(
                     price=Sum(
-                            F('order__product__price') * F('order__quantity')
-                        )
+                        F('order__price') * F('order__quantity')
                     )
+                )
                 .order_by('-pk')
                 )
 
@@ -197,6 +197,13 @@ class ProductOrder(models.Model):
         validators=[MinValueValidator(1)],
         verbose_name='количество'
     )
+    price = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0.00,
+        verbose_name='цена',
+    )
 
     class Meta:
         verbose_name = 'товар'
@@ -204,10 +211,3 @@ class ProductOrder(models.Model):
 
     def __str__(self):
         return self.product.name
-
-    # products = (
-    #     RestaurantMenuItem.objects
-    #     .filter(availability=True)
-    #     .values_list('product')
-    # )
-    # return self.filter(pk__in=products)

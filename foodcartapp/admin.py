@@ -139,3 +139,14 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         ProductOrderInline
     ]
+
+    def save_formset(self, request, form, formset, change):
+        products = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for product in products:
+            if not change:
+                price = Product.objects.get(pk=product.product_id).price
+                product.price = price
+            product.save()
+        formset.save()
