@@ -170,6 +170,11 @@ class Order(models.Model):
         auto_now_add=True,
         verbose_name='создан',
     )
+    comment = models.TextField(
+        max_length=250,
+        blank=True,
+        verbose_name='комментарий',
+    )
 
     objects = OrderQuerySet.as_manager()
 
