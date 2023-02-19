@@ -144,11 +144,21 @@ class Order(models.Model):
         ('PROCESSED', 'Необработан'),
         ('COMPLETED', 'Завершен'),
     )
+    payment = (
+        ('CARD', 'Электронно'),
+        ('CASH', 'Наличные'),
+    )
     status = models.CharField(
         max_length=9,
         choices=status,
         default='PROCESSED',
         verbose_name='статус заказа',
+    )
+    payment = models.CharField(
+        max_length=4,
+        choices=payment,
+        default='CASH',
+        verbose_name='способ оплаты',
     )
     firstname = models.CharField(
         max_length=20,
@@ -199,7 +209,8 @@ class Order(models.Model):
                 'address',
                 'status',
                 'called',
-                'completed'
+                'completed',
+                'payment'
             ]
             )
         ]
