@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework import status
@@ -67,24 +68,24 @@ def register_order(request):
         order_data = request.data
         serializer = OrderSerializer(data=order_data)
         serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            order = Order.objects.create(
+                firstname=serializer.validated_data['firstname'],
+                lastname=serializer.validated_data['lastname'],
+                phonenumber=serializer.validated_data['phonenumber'],
+                address=serializer.validated_data['address']
+            )
 
-        order = Order.objects.create(
-            firstname=serializer.validated_data['firstname'],
-            lastname=serializer.validated_data['lastname'],
-            phonenumber=serializer.validated_data['phonenumber'],
-            address=serializer.validated_data['address']
-        )
+            product_list = serializer.validated_data['products']
+            order_products = [
+                ProductOrder(
+                    order=order,
+                    price=fields['product'].price,
+                    **fields
+                ) for fields in product_list
+            ]
+            ProductOrder.objects.bulk_create(order_products)
 
-        product_list = serializer.validated_data['products']
-        order_products = [
-            ProductOrder(
-                order=order,
-                price=fields['product'].price,
-                **fields
-            ) for fields in product_list
-        ]
-        ProductOrder.objects.bulk_create(order_products)
-
-        created_order = OrderSerializerResponse(order)
+            created_order = OrderSerializerResponse(order)
 
         return Response(created_order.data, status=status.HTTP_201_CREATED)
