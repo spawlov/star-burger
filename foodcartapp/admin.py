@@ -10,6 +10,7 @@ from .models import ProductCategory
 from .models import ProductOrder
 from .models import Restaurant
 from .models import RestaurantMenuItem
+from .models import RestaurantOrder
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -116,7 +117,11 @@ class ProductAdmin(admin.ModelAdmin):
 
 class ProductOrderInline(admin.TabularInline):
     model = ProductOrder
-    fk_name = 'order'
+    extra = 0
+
+
+class RestaurantOrderInline(admin.StackedInline):
+    model = RestaurantOrder
     extra = 0
 
 
@@ -139,19 +144,42 @@ class OrderAdmin(admin.ModelAdmin):
         'status'
     ]
     readonly_fields = ['created']
+
     inlines = [
-        ProductOrderInline
+        ProductOrderInline,
+        RestaurantOrderInline
     ]
 
     def save_formset(self, request, form, formset, change):
-        products = formset.save(commit=False)
+        instances = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
-        for product in products:
-            if not change:
-                price = Product.objects.get(pk=product.product_id).price
-                product.price = price
-            product.save()
+            if obj.__class__.__name__ == 'RestaurantOrder':
+                print(RestaurantOrder.objects.filter(
+                    order=obj.order).count())
+                if RestaurantOrder.objects.filter(
+                    order=obj.order
+                ).count() == 1:
+                    Order.objects.filter(pk=obj.order_id).update(
+                        status='PROCESSED'
+                    )
+        for instance in instances:
+            if instance.__class__.__name__ == 'ProductOrder':
+                if not instance.price:
+                    instance.price = (
+                        Product.objects
+                        .get(pk=instance.product_id)
+                        .price
+                    )
+                instance.save()
+            elif instance.__class__.__name__ == 'RestaurantOrder':
+                instance.save()
+                if RestaurantOrder.objects.filter(
+                    order=instance.order
+                ).count() == 1:
+                    Order.objects.filter(pk=instance.order_id).update(
+                        status='PROCESSED'
+                    )
         formset.save()
 
     def response_post_save_change(self, request, obj):
@@ -160,3 +188,7 @@ class OrderAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.GET['next'])
         else:
             return result
+
+# @admin.register(RestaurantOrder)
+# class RestaurantOrderAdmin(admin.ModelAdmin):
+#     pass

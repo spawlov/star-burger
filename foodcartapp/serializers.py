@@ -27,7 +27,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializerResponse(serializers.ModelSerializer):
-    products = ProductOrderSerializer(source='order', many=True)
+    products = ProductOrderSerializer(source='orders', many=True)
 
     class Meta:
         model = Order

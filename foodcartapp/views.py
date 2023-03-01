@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Product, ProductOrder, Order
+from .models import Product, ProductOrder, Order, RestaurantMenuItem, \
+    RestaurantOrder
 from .serializers import OrderSerializer, OrderSerializerResponse
 
 
@@ -84,7 +85,26 @@ def register_order(request):
                     **fields
                 ) for fields in product_list
             ]
-            ProductOrder.objects.bulk_create(order_products)
+            products = ProductOrder.objects.bulk_create(order_products)
+
+            for product in products:
+                rests = RestaurantMenuItem.objects.filter(
+                        product_id=product.product_id, availability=True
+                        )
+                result_rests = []
+                if not result_rests:
+                    result_rests = rests
+                set_rests = set(result_rests).intersection(set(rests))
+                if not set_rests:
+                    break
+                else:
+                    result_rests = rests
+            for restaurant in result_rests:
+                RestaurantOrder.objects.create(
+                    order=order,
+                    restaurant=restaurant.restaurant,
+                    distance=0
+                )
 
             created_order = OrderSerializerResponse(order)
 

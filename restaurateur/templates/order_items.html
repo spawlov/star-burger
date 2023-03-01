@@ -3,6 +3,24 @@
 {% block title %}Необработанные заказы | Star Burger{% endblock %}
 
 {% block content %}
+  <style>
+  summary {
+  display: block;
+}
+
+  summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: '\25B6';
+  padding-right: 0.5em;
+}
+
+details[open] > summary::before {
+  content: '\25BC';
+}
+  </style>
   <center>
     <h2>Необработанные заказы</h2>
   </center>
@@ -21,23 +39,38 @@
         <th>Телефон</th>
         <th>Адрес доставки</th>
         <th>Комментарий</th>
+        <th>Рестораны</th>
         <th>Действие</th>
       </tr>
 
-      {% for item in order_items %}
+      {% for order, item in order_items.items %}
         <tr>
-          <td>{{ item.pk }}</td>
-          <td>{{ item.get_status_display }}</td>
-          <td>{{ item.get_payment_display }}</td>
+          <td>{{ order }}</td>
+          <td>{{ item.status }}</td>
+          <td>{{ item.payment }}</td>
           <td>{{ item.price }} &#8381;</td>
           <td>{{ item.firstname }} {{ item.lastname }}</td>
           <td>{{ item.phonenumber }}</td>
           <td>{{ item.address }}</td>
           <td>{{ item.comment|truncatechars:25 }}</td>
           <td>
-            <a href="{% url 'admin:foodcartapp_order_change' item.pk %}?next={{ request.path }}">Редактировать</a>
+          {% if item.rests|length > 1 %}
+            <details>
+              <summary>Рестораны готовящие заказ</summary>
+                <ol>
+                  {% for rest in item.rests %}<li>{{ rest }}</li>{% endfor %}
+                </ol>
+            </details>
+          {% else %}
+            {% for rest in item.rests %}{{ rest }}{% endfor %}
+          {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin:foodcartapp_order_change' order %}?next={{ request.path }}">Изменить</a>
           </td>
         </tr>
+      {% empty %}
+        <tr><td colspan="10"><h2 style="text-align: center">Необработанных заказов нет</h2></td></tr>
       {% endfor %}
     </table>
   </div>

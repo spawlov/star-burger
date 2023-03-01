@@ -126,22 +126,41 @@ class RestaurantMenuItem(models.Model):
 
 
 class OrderQuerySet(models.QuerySet):
-    def get_price(self):
-        return (self
-                .filter(status='PROCESSED')
-                .select_related()
-                .annotate(
-                    price=Sum(
-                        F('order__price') * F('order__quantity')
+    def get_order_list(self):
+        orders = (Order.objects
+                  .filter(status__in=['WAITING', 'PROCESSED'])
+                  .annotate(price=Sum(
+                        F('orders__price') * F('orders__quantity')
+                        ),
                     )
-                )
-                .order_by('-pk')
-                )
+                  .order_by('-status', 'pk')
+                  )
+        order_items = {}
+        for order in orders:
+            order_items[order.pk] = {'rests': []}
+            order_items[order.pk]['status'] = order.get_status_display()
+            order_items[order.pk]['payment'] = order.get_payment_display()
+            order_items[order.pk]['price'] = order.price
+            order_items[order.pk]['firstname'] = order.firstname
+            order_items[order.pk]['lastname'] = order.lastname
+            order_items[order.pk]['phonenumber'] = order.phonenumber
+            order_items[order.pk]['address'] = order.address
+            order_items[order.pk]['comment'] = order.comment
+
+            order_items[order.pk]['rests'] = list(
+                RestaurantOrder.objects
+                .select_related()
+                .filter(order=order)
+                .values_list('restaurant__name', flat=True)
+            )
+
+        return order_items
 
 
 class Order(models.Model):
     status = (
-        ('PROCESSED', 'Необработан'),
+        ('WAITING', 'Необработан'),
+        ('PROCESSED', 'Готовится'),
         ('COMPLETED', 'Завершен'),
     )
     payment = (
@@ -151,7 +170,7 @@ class Order(models.Model):
     status = models.CharField(
         max_length=9,
         choices=status,
-        default='PROCESSED',
+        default='WAITING',
         verbose_name='статус заказа',
     )
     payment = models.CharField(
@@ -223,13 +242,13 @@ class ProductOrder(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='order',
+        related_name='orders',
         verbose_name='заказ',
     )
     product = models.ForeignKey(
         Product,
         on_delete=models.PROTECT,
-        related_name='product',
+        related_name='products',
         verbose_name='наименование',
     )
     quantity = models.IntegerField(
@@ -251,3 +270,27 @@ class ProductOrder(models.Model):
 
     def __str__(self):
         return self.product.name
+
+
+class RestaurantOrder(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        verbose_name='заказ'
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        related_name='restaurants',
+        on_delete=models.PROTECT,
+        verbose_name='ресторан',
+    )
+    distance = models.FloatField(
+        verbose_name='расстояние'
+    )
+
+    class Meta:
+        verbose_name = 'ресторан готовящий заказ'
+        verbose_name_plural = 'рестораны готовящие заказ'
+
+    def __str__(self):
+        return self.restaurant.name
