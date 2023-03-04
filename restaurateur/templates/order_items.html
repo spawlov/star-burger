@@ -58,11 +58,11 @@ details[open] > summary::before {
             <details>
               <summary>Рестораны готовящие заказ</summary>
                 <ol>
-                  {% for rest in item.rests %}<li>{{ rest }} - {{ rest.distance }}км</li>{% endfor %}
+                  {% for rest in item.rests %}<li>{{ rest.restaurant.name }} - {{ rest.distance }}км</li>{% endfor %}
                 </ol>
             </details>
           {% else %}
-            {% for rest in item.rests %}Готовит: {{ rest }} - {{ rest.distance }}км{% endfor %}
+            {% for rest in item.rests %}Готовит: {{ rest.restaurant.name }} - {{ rest.distance }}км{% endfor %}
           {% endif %}
           </td>
           <td>

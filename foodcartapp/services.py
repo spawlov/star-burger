@@ -14,10 +14,9 @@ def fetch_coordinates(apikey, address):
         })
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        return e
+        print(e)
     else:
-        found_places = response.json()['response']['GeoObjectCollection'][
-            'featureMember']
+        found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
         if not found_places:
             return response
@@ -29,7 +28,10 @@ def fetch_coordinates(apikey, address):
 
 def calc_distance(restaurant, client):
     api_key = settings.GEO_API_KEY
-    return distance.distance(
-        fetch_coordinates(api_key, restaurant),
-        fetch_coordinates(api_key, client)
-    ).km
+    restaurant_coords = fetch_coordinates(api_key, restaurant)
+    client_coords = fetch_coordinates(api_key, client)
+
+    if not all([restaurant_coords, client_coords]):
+        return 0
+
+    return distance.distance(restaurant_coords, client_coords).km

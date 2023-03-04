@@ -149,7 +149,7 @@ class OrderQuerySet(models.QuerySet):
 
             order_items[order.pk]['rests'] = (
                 RestaurantOrder.objects
-                .select_related()
+                .select_related('restaurant')
                 .filter(order=order)
                 .order_by('distance')
             )
