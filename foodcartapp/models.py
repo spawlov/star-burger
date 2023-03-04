@@ -147,11 +147,11 @@ class OrderQuerySet(models.QuerySet):
             order_items[order.pk]['address'] = order.address
             order_items[order.pk]['comment'] = order.comment
 
-            order_items[order.pk]['rests'] = list(
+            order_items[order.pk]['rests'] = (
                 RestaurantOrder.objects
                 .select_related()
                 .filter(order=order)
-                .values_list('restaurant__name', flat=True)
+                .order_by('distance')
             )
 
         return order_items
@@ -275,6 +275,7 @@ class ProductOrder(models.Model):
 class RestaurantOrder(models.Model):
     order = models.ForeignKey(
         Order,
+        # related_name='no_orders',
         on_delete=models.CASCADE,
         verbose_name='заказ'
     )
@@ -285,6 +286,8 @@ class RestaurantOrder(models.Model):
         verbose_name='ресторан',
     )
     distance = models.FloatField(
+        validators=[MinValueValidator(0)],
+        default=0,
         verbose_name='расстояние'
     )
 

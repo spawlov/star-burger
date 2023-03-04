@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
@@ -11,6 +13,7 @@ from .models import ProductOrder
 from .models import Restaurant
 from .models import RestaurantMenuItem
 from .models import RestaurantOrder
+from .services import calc_distance
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -120,14 +123,18 @@ class ProductOrderInline(admin.TabularInline):
     extra = 0
 
 
-class RestaurantOrderInline(admin.StackedInline):
+class RestaurantOrderInline(admin.TabularInline):
     model = RestaurantOrder
+    readonly_fields = ['distance']
+    ordering = ['distance']
     extra = 0
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    save_on_top = True
     list_display = [
+        'id',
         'created',
         'firstname',
         'lastname',
@@ -143,7 +150,8 @@ class OrderAdmin(admin.ModelAdmin):
         'address',
         'status'
     ]
-    readonly_fields = ['created']
+    list_filter = ['status']
+    readonly_fields = ['created', 'called', 'completed']
 
     inlines = [
         ProductOrderInline,
@@ -155,13 +163,12 @@ class OrderAdmin(admin.ModelAdmin):
         for obj in formset.deleted_objects:
             obj.delete()
             if obj.__class__.__name__ == 'RestaurantOrder':
-                print(RestaurantOrder.objects.filter(
-                    order=obj.order).count())
                 if RestaurantOrder.objects.filter(
                     order=obj.order
                 ).count() == 1:
                     Order.objects.filter(pk=obj.order_id).update(
-                        status='PROCESSED'
+                        status='PROCESSED',
+                        called=datetime.datetime.now(),
                     )
         for instance in instances:
             if instance.__class__.__name__ == 'ProductOrder':
@@ -173,12 +180,19 @@ class OrderAdmin(admin.ModelAdmin):
                     )
                 instance.save()
             elif instance.__class__.__name__ == 'RestaurantOrder':
+                if not instance.distance:
+                    distance = calc_distance(
+                        instance.restaurant.address,
+                        instance.order.address
+                    )
+                    instance.distance = round(distance, 2)
                 instance.save()
                 if RestaurantOrder.objects.filter(
                     order=instance.order
                 ).count() == 1:
                     Order.objects.filter(pk=instance.order_id).update(
-                        status='PROCESSED'
+                        status='PROCESSED',
+                        called=datetime.datetime.now(),
                     )
         formset.save()
 
@@ -188,7 +202,3 @@ class OrderAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.GET['next'])
         else:
             return result
-
-# @admin.register(RestaurantOrder)
-# class RestaurantOrderAdmin(admin.ModelAdmin):
-#     pass

@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .models import Product, ProductOrder, Order, RestaurantMenuItem, \
     RestaurantOrder
 from .serializers import OrderSerializer, OrderSerializerResponse
+from .services import calc_distance
 
 
 def banners_list_api(request):
@@ -100,10 +101,14 @@ def register_order(request):
                 else:
                     result_rests = rests
             for restaurant in result_rests:
+                distance = calc_distance(
+                    restaurant.restaurant.address,
+                    order.address
+                )
                 RestaurantOrder.objects.create(
                     order=order,
                     restaurant=restaurant.restaurant,
-                    distance=0
+                    distance=round(distance, 2)
                 )
 
             created_order = OrderSerializerResponse(order)
