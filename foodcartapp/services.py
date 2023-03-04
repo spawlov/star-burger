@@ -1,6 +1,8 @@
 import requests
 from geopy import distance
 
+from django.conf import settings
+
 
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
@@ -26,7 +28,7 @@ def fetch_coordinates(apikey, address):
 
 
 def calc_distance(restaurant, client):
-    api_key = 'e99634f6-ec6c-49fb-900d-b4112b1adb45'
+    api_key = settings.GEO_API_KEY
     return distance.distance(
         fetch_coordinates(api_key, restaurant),
         fetch_coordinates(api_key, client)
