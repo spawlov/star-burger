@@ -13,6 +13,8 @@ def fetch_coordinates(apikey, address):
             "format": "json",
         })
         response.raise_for_status()
+    except requests.exceptions.ConnectionError as e:
+        print(e)
     except requests.exceptions.HTTPError as e:
         print(e)
     else:
