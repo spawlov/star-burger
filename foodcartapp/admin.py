@@ -1,18 +1,19 @@
 from django.contrib import admin
-from django.http import HttpResponseRedirect
-from django.shortcuts import reverse
+from django.shortcuts import reverse, redirect
 from django.templatetags.static import static
 from django.utils import timezone
+from django.utils.encoding import iri_to_uri
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 
+from .geocoder import calculate_distance
 from .models import Order
 from .models import Product
 from .models import ProductCategory
-from .models import ProductOrder
+from .models import OrderItem
 from .models import Restaurant
 from .models import RestaurantMenuItem
 from .models import RestaurantOrder
-from .services import calc_distance
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -118,7 +119,7 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 class ProductOrderInline(admin.TabularInline):
-    model = ProductOrder
+    model = OrderItem
     extra = 0
 
 
@@ -134,7 +135,7 @@ class OrderAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = [
         'id',
-        'created',
+        'created_at',
         'firstname',
         'lastname',
         'phonenumber',
@@ -142,7 +143,7 @@ class OrderAdmin(admin.ModelAdmin):
         'status'
     ]
     list_display_links = [
-        'created',
+        'created_at',
         'firstname',
         'lastname',
         'phonenumber',
@@ -150,7 +151,7 @@ class OrderAdmin(admin.ModelAdmin):
         'status'
     ]
     list_filter = ['status']
-    readonly_fields = ['created', 'called', 'completed']
+    readonly_fields = ['created_at']
 
     inlines = [
         ProductOrderInline,
@@ -158,6 +159,9 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     def save_formset(self, request, form, formset, change):
+        """If the manager, after calling with the client, leaves one restaurant
+        for processing the order, the order status changes to PROCESS and
+        the time of the call with the client is automatically set"""
         instances = formset.save(commit=False)
         for obj in formset.deleted_objects:
             obj.delete()
@@ -166,8 +170,8 @@ class OrderAdmin(admin.ModelAdmin):
                     order=obj.order
                 ).count() == 1:
                     Order.objects.filter(pk=obj.order_id).update(
-                        status='PROCESSED',
-                        called=timezone.now(),
+                        status='PROCESS',
+                        called_at=timezone.now(),
                     )
         for instance in instances:
             if instance.__class__.__name__ == 'ProductOrder':
@@ -180,7 +184,7 @@ class OrderAdmin(admin.ModelAdmin):
                 instance.save()
             elif instance.__class__.__name__ == 'RestaurantOrder':
                 if not instance.distance:
-                    distance = calc_distance(
+                    distance = calculate_distance(
                         instance.restaurant.address,
                         instance.order.address
                     )
@@ -190,14 +194,16 @@ class OrderAdmin(admin.ModelAdmin):
                     order=instance.order
                 ).count() == 1:
                     Order.objects.filter(pk=instance.order_id).update(
-                        status='PROCESSED',
-                        called=timezone.now(),
+                        status='PROCESS',
+                        called_at=timezone.now(),
                     )
         formset.save()
 
     def response_post_save_change(self, request, obj):
         result = super().response_post_save_change(request, obj)
-        if 'next' in request.GET:
-            return HttpResponseRedirect(request.GET['next'])
-        else:
+
+        if not ('next' in request.GET):
             return result
+
+        if url_has_allowed_host_and_scheme(request.GET['next'], None):
+            return redirect(iri_to_uri(request.GET['next']))

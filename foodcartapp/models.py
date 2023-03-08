@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.validators import MinValueValidator
+from django.db import models
 from django.db.models import Sum, F
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -126,41 +126,24 @@ class RestaurantMenuItem(models.Model):
 
 
 class OrderQuerySet(models.QuerySet):
-    def get_order_list(self):
-        orders = (Order.objects
-                  .filter(status__in=['WAITING', 'PROCESSED'])
-                  .annotate(price=Sum(
-                        F('orders__price') * F('orders__quantity')
-                        ),
-                    )
-                  .order_by('-status', 'pk')
-                  )
-        order_items = {}
-        for order in orders:
-            order_items[order.pk] = {'rests': []}
-            order_items[order.pk]['status'] = order.get_status_display()
-            order_items[order.pk]['payment'] = order.get_payment_display()
-            order_items[order.pk]['price'] = order.price
-            order_items[order.pk]['firstname'] = order.firstname
-            order_items[order.pk]['lastname'] = order.lastname
-            order_items[order.pk]['phonenumber'] = order.phonenumber
-            order_items[order.pk]['address'] = order.address
-            order_items[order.pk]['comment'] = order.comment
+    def get_order_price(self):
 
-            order_items[order.pk]['rests'] = (
-                RestaurantOrder.objects
-                .select_related('restaurant')
-                .filter(order=order)
-                .order_by('distance')
-            )
-
-        return order_items
+        orders_with_price = (Order.objects
+                             .prefetch_related('order_num__restaurant')
+                             .filter(status__in=['WAITING', 'PROCESS'])
+                             .annotate(price=Sum(
+                                F('order_no__price') * F('order_no__quantity')
+                                )
+                                )
+                             .order_by('-status', 'pk')
+                             )
+        return orders_with_price
 
 
 class Order(models.Model):
     status = (
         ('WAITING', 'Необработан'),
-        ('PROCESSED', 'Готовится'),
+        ('PROCESS', 'Готовится'),
         ('COMPLETED', 'Завершен'),
     )
     payment = (
@@ -168,31 +151,37 @@ class Order(models.Model):
         ('CASH', 'Наличные'),
     )
     status = models.CharField(
-        max_length=9,
+        max_length=10,
         choices=status,
         default='WAITING',
+        db_index=True,
         verbose_name='статус заказа',
     )
     payment = models.CharField(
         max_length=4,
         choices=payment,
-        default='CASH',
+        blank=True,
+        db_index=True,
         verbose_name='способ оплаты',
     )
     firstname = models.CharField(
         max_length=20,
+        db_index=True,
         verbose_name='имя',
     )
     lastname = models.CharField(
         max_length=20,
+        db_index=True,
         verbose_name='фамилия',
     )
     phonenumber = PhoneNumberField(
         region='RU',
+        db_index=True,
         verbose_name='телефон',
     )
     address = models.CharField(
         max_length=128,
+        db_index=True,
         verbose_name='адрес доставки'
     )
     comment = models.TextField(
@@ -200,18 +189,21 @@ class Order(models.Model):
         blank=True,
         verbose_name='комментарий',
     )
-    created = models.DateTimeField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
+        db_index=True,
         verbose_name='создан',
     )
-    called = models.DateTimeField(
+    called_at = models.DateTimeField(
         blank=True,
         null=True,
+        db_index=True,
         verbose_name='звонок клиенту',
     )
-    completed = models.DateTimeField(
+    completed_at = models.DateTimeField(
         blank=True,
         null=True,
+        db_index=True,
         verbose_name='доставлен',
     )
 
@@ -220,29 +212,17 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
-        indexes = [
-            models.Index(fields=[
-                'phonenumber',
-                'firstname',
-                'lastname',
-                'address',
-                'status',
-                'called',
-                'completed',
-                'payment'
-            ]
-            )
-        ]
 
     def __str__(self):
         return f'Заказ №{self.pk}'
 
 
-class ProductOrder(models.Model):
+class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='orders',
+        related_name='order_no',
+        blank=True,
         verbose_name='заказ',
     )
     product = models.ForeignKey(
@@ -252,15 +232,14 @@ class ProductOrder(models.Model):
         verbose_name='наименование',
     )
     quantity = models.IntegerField(
-        default=1,
         validators=[MinValueValidator(1)],
         verbose_name='количество'
     )
     price = models.DecimalField(
         max_digits=8,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
-        default=0.00,
+        validators=[MinValueValidator(100)],
+        default=100.00,
         verbose_name='цена',
     )
 
@@ -269,14 +248,14 @@ class ProductOrder(models.Model):
         verbose_name_plural = 'товары'
 
     def __str__(self):
-        return self.product.name
+        return f'{self.product.name}, {self.price}руб.'
 
 
 class RestaurantOrder(models.Model):
     order = models.ForeignKey(
         Order,
-        # related_name='no_orders',
         on_delete=models.CASCADE,
+        related_name='order_num',
         verbose_name='заказ'
     )
     restaurant = models.ForeignKey(
@@ -287,13 +266,14 @@ class RestaurantOrder(models.Model):
     )
     distance = models.FloatField(
         validators=[MinValueValidator(0)],
-        default=0,
+        default=100,
         verbose_name='расстояние'
     )
 
     class Meta:
         verbose_name = 'ресторан готовящий заказ'
         verbose_name_plural = 'рестораны готовящие заказ'
+        ordering = ['distance']
 
     def __str__(self):
         return self.restaurant.name

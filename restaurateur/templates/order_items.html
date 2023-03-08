@@ -43,30 +43,50 @@ details[open] > summary::before {
         <th>Действие</th>
       </tr>
 
-      {% for order, item in order_items.items %}
+      {% for item in order_items %}
         <tr>
-          <td>{{ order }}</td>
-          <td>{{ item.status }}</td>
-          <td>{{ item.payment }}</td>
+          <td>{{ item.id }}</td>
+          <td>
+            {% if item.status == 'Необработан' %}
+              <span style="color: red;">{{ item.status }}</span>
+            {% else %}
+              {{ item.status }}
+            {% endif %}
+          </td>
+          <td>
+            {% if not item.payment %}
+              <span style="color: red;">{{ item.payment|default:'Не выбран' }}</span>
+            {% else %}
+              {{ item.payment }}
+            {% endif %}
+          </td>
           <td>{{ item.price }} &#8381;</td>
           <td>{{ item.firstname }} {{ item.lastname }}</td>
           <td>{{ item.phonenumber }}</td>
           <td>{{ item.address }}</td>
           <td>{{ item.comment|truncatechars:25 }}</td>
           <td>
-          {% if item.rests|length > 1 %}
+          {% if item.restaurants|length > 1 %}
             <details>
               <summary>Рестораны готовящие заказ</summary>
                 <ol>
-                  {% for rest in item.rests %}<li>{{ rest.restaurant.name }} - {{ rest.distance }}км</li>{% endfor %}
+                  {% for restaurant in item.restaurants %}
+                    <li>{{ restaurant.restaurant }} -
+                      {% if restaurant.distance < 100 %}
+                        {{ restaurant.distance }}км
+                      {% else %}
+                        {{ restaurant.distance }}км - необходимо уточнить
+                    {% endif %}
+                    </li>
+                  {% endfor %}
                 </ol>
             </details>
           {% else %}
-            {% for rest in item.rests %}Готовит: {{ rest.restaurant.name }} - {{ rest.distance }}км{% endfor %}
+            {% for restaurant in item.restaurants %}Готовит: {{ restaurant.restaurant }}{% endfor %}
           {% endif %}
           </td>
           <td>
-            <a href="{% url 'admin:foodcartapp_order_change' order %}?next={{ request.path }}">Изменить</a>
+            <a href="{% url 'admin:foodcartapp_order_change' item.id %}?next={{ request.path }}">Изменить</a>
           </td>
         </tr>
       {% empty %}

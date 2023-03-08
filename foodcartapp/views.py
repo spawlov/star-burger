@@ -1,14 +1,12 @@
-from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Product, ProductOrder, Order, RestaurantMenuItem, \
-    RestaurantOrder
-from .serializers import OrderSerializer, OrderSerializerResponse
-from .services import calc_distance
+from .models import Product
+from .serializers import OrderSerializerResponse, \
+    OrderCreateSerializer
 
 
 def banners_list_api(request):
@@ -65,52 +63,11 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-
-    if request.method == 'POST':
-        order_data = request.data
-        serializer = OrderSerializer(data=order_data)
-        serializer.is_valid(raise_exception=True)
-        with transaction.atomic():
-            order = Order.objects.create(
-                firstname=serializer.validated_data['firstname'],
-                lastname=serializer.validated_data['lastname'],
-                phonenumber=serializer.validated_data['phonenumber'],
-                address=serializer.validated_data['address']
-            )
-
-            product_list = serializer.validated_data['products']
-            order_products = [
-                ProductOrder(
-                    order=order,
-                    price=fields['product'].price,
-                    **fields
-                ) for fields in product_list
-            ]
-            products = ProductOrder.objects.bulk_create(order_products)
-
-            for product in products:
-                rests = RestaurantMenuItem.objects.filter(
-                        product_id=product.product_id, availability=True
-                        )
-                result_rests = []
-                if not result_rests:
-                    result_rests = rests
-                set_rests = set(result_rests).intersection(set(rests))
-                if not set_rests:
-                    break
-                else:
-                    result_rests = rests
-            for restaurant in result_rests:
-                distance = calc_distance(
-                    restaurant.restaurant.address,
-                    order.address
-                )
-                RestaurantOrder.objects.create(
-                    order=order,
-                    restaurant=restaurant.restaurant,
-                    distance=round(distance, 2)
-                )
-
-            created_order = OrderSerializerResponse(order)
-
-        return Response(created_order.data, status=status.HTTP_201_CREATED)
+    serializer = OrderCreateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(
+        OrderSerializerResponse(
+            serializer.instance
+        ).data, status=status.HTTP_201_CREATED
+    )
