@@ -14,19 +14,52 @@ class ProductOrderSerializer(serializers.ModelSerializer):
         ]
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    """The serializer is used to create an object"""
+class OrderCreateSerializer(serializers.ModelSerializer):
     products = ProductOrderSerializer(many=True, required=True)
 
     class Meta:
         model = Order
         fields = [
-            'products',
             'firstname',
             'lastname',
             'phonenumber',
-            'address'
+            'address',
+            'products'
         ]
+
+    def create(self, validated_data):
+        products_data = validated_data.pop('products')
+        order = Order.objects.create(**validated_data)
+        for product_data in products_data:
+            OrderItem.objects.create(
+                order=order,
+                price=product_data['product'].price,
+
+                **product_data
+            )
+        result_restaurants = []
+        for product in OrderItem.objects.filter(order=order):
+            restaurants = RestaurantMenuItem.objects.filter(
+                            product_id=product.product_id, availability=True
+                            )
+            if not result_restaurants:
+                result_restaurants = restaurants
+            set_restaurants = set(result_restaurants).intersection(set(restaurants))
+            if not set_restaurants:
+                break
+            else:
+                result_restaurants = restaurants
+        for restaurant in result_restaurants:
+            distance = calculate_distance(
+                restaurant.restaurant.address,
+                order.address
+            )
+            RestaurantOrder.objects.create(
+                order=order,
+                restaurant=restaurant.restaurant,
+                distance=round(distance, 2)
+            )
+        return order
 
 
 class OrderSerializerResponse(serializers.ModelSerializer):
@@ -81,51 +114,3 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     def get_payment(self, payment_obj):
         return payment_obj.get_payment_display()
-
-
-class OrderCreateSerializer(serializers.ModelSerializer):
-    products = ProductOrderSerializer(many=True, required=True)
-
-    class Meta:
-        model = Order
-        fields = [
-            'firstname',
-            'lastname',
-            'phonenumber',
-            'address',
-            'products'
-        ]
-
-    def create(self, validated_data):
-        products_data = validated_data.pop('products')
-        order = Order.objects.create(**validated_data)
-        for product_data in products_data:
-            OrderItem.objects.create(
-                order=order,
-                price=product_data['product'].price,
-
-                **product_data
-            )
-        result_restaurants = []
-        for product in OrderItem.objects.filter(order=order):
-            restaurants = RestaurantMenuItem.objects.filter(
-                            product_id=product.product_id, availability=True
-                            )
-            if not result_restaurants:
-                result_restaurants = restaurants
-            set_restaurants = set(result_restaurants).intersection(set(restaurants))
-            if not set_restaurants:
-                break
-            else:
-                result_restaurants = restaurants
-        for restaurant in result_restaurants:
-            distance = calculate_distance(
-                restaurant.restaurant.address,
-                order.address
-            )
-            RestaurantOrder.objects.create(
-                order=order,
-                restaurant=restaurant.restaurant,
-                distance=round(distance, 2)
-            )
-        return order
