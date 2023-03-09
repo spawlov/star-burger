@@ -238,8 +238,7 @@ class OrderItem(models.Model):
     price = models.DecimalField(
         max_digits=8,
         decimal_places=2,
-        validators=[MinValueValidator(100)],
-        default=100.00,
+        validators=[MinValueValidator(0)],
         verbose_name='цена',
     )
 
@@ -266,7 +265,8 @@ class RestaurantOrder(models.Model):
     )
     distance = models.FloatField(
         validators=[MinValueValidator(0)],
-        default=100,
+        blank=True,
+        null=True,
         verbose_name='расстояние'
     )
 

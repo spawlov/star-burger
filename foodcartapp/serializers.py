@@ -27,16 +27,23 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             'products'
         ]
 
+    def validate_products(self, products):
+        if len(products) < 1:
+            raise serializers.ValidationError(
+                {'error': 'Список продуктов не может быть пустым'}
+            )
+        return products
+
     def create(self, validated_data):
         products_data = validated_data.pop('products')
         order = Order.objects.create(**validated_data)
-        for product_data in products_data:
-            OrderItem.objects.create(
-                order=order,
-                price=product_data['product'].price,
+        order_products = [OrderItem(
+            order=order,
+            price=product_data['product'].price,
+            **product_data
+        ) for product_data in products_data]
+        OrderItem.objects.bulk_create(order_products)
 
-                **product_data
-            )
         result_restaurants = []
         for product in OrderItem.objects.filter(order=order):
             restaurants = RestaurantMenuItem.objects.filter(
@@ -47,8 +54,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             set_restaurants = set(result_restaurants).intersection(set(restaurants))
             if not set_restaurants:
                 break
-            else:
-                result_restaurants = restaurants
+            result_restaurants = restaurants
+
         for restaurant in result_restaurants:
             distance = calculate_distance(
                 restaurant.restaurant.address,
@@ -57,7 +64,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             RestaurantOrder.objects.create(
                 order=order,
                 restaurant=restaurant.restaurant,
-                distance=round(distance, 2)
+                distance=distance
             )
         return order
 

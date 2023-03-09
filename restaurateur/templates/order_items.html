@@ -72,10 +72,10 @@ details[open] > summary::before {
                 <ol>
                   {% for restaurant in item.restaurants %}
                     <li>{{ restaurant.restaurant }} -
-                      {% if restaurant.distance < 100 %}
-                        {{ restaurant.distance }}км
+                      {% if not restaurant.distance or restaurant.distance > 100 %}
+                        необходимо уточнить
                       {% else %}
-                        {{ restaurant.distance }}км - необходимо уточнить
+                        {{ restaurant.distance }}км
                     {% endif %}
                     </li>
                   {% endfor %}
