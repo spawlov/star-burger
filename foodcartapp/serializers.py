@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from .geocoder import calculate_distance
-from .models import Order, OrderItem, Product, RestaurantOrder, \
-    RestaurantMenuItem
+from .models import Order, OrderItem, RestaurantOrder, RestaurantMenuItem
 
 
 class ProductOrderSerializer(serializers.ModelSerializer):
