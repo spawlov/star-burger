@@ -82,7 +82,11 @@ details[open] > summary::before {
                 </ol>
             </details>
           {% else %}
-            {% for restaurant in item.restaurants %}Готовит: {{ restaurant.restaurant }}{% endfor %}
+            {% if item.restaurants|length == 0 %}
+              Нет ресторанов могущих приготовить весь заказ
+            {% else %}
+              {% for restaurant in item.restaurants %}Готовит: {{ restaurant.restaurant }}{% endfor %}
+            {% endif %}
           {% endif %}
           </td>
           <td>
