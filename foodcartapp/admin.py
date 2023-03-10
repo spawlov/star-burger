@@ -152,6 +152,14 @@ class OrderAdmin(admin.ModelAdmin):
     ]
     list_filter = ['status']
     readonly_fields = ['created_at']
+    search_fields = [
+        'pk',
+        'created_at',
+        'phonenumber',
+        'firstname',
+        'lastname',
+        'address'
+    ]
 
     inlines = [
         ProductOrderInline,
