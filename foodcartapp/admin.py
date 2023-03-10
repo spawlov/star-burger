@@ -160,6 +160,7 @@ class OrderAdmin(admin.ModelAdmin):
         'lastname',
         'address'
     ]
+    list_per_page = 10
 
     inlines = [
         ProductOrderInline,
