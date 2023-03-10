@@ -85,7 +85,7 @@ details[open] > summary::before {
             {% if item.restaurants|length == 0 %}
               <span style="color: red;">Нет ресторанов могущих приготовить весь заказ</span>
             {% else %}
-              {% for restaurant in item.restaurants %}Готовит: {{ restaurant.restaurant }}{% endfor %}
+              {% for restaurant in item.restaurants %}Готовит: {{ restaurant.restaurant }} - {{ restaurant.distance }}км{% endfor %}
             {% endif %}
           {% endif %}
           </td>
