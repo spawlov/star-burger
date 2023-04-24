@@ -97,6 +97,14 @@ DATABASES = {
     )
 }
 
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=env('DB_URL'),
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

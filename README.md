@@ -154,7 +154,13 @@ Parcel будет следить за файлами в каталоге `bundle
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `ROLLBAR_TOKEN` — Ваш токен в Rollbar
-- `ROLLBAR_ENV` = production
+- `ROLLBAR_ENV` = установить в `production`
+
+Переход на `postgresql`: создать базу данных, создать пользователя с паролем и дать ему все привилегии для новой базы данных [Туториал по postgresql](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04).
+
+В файле `.env` в каталоге `star_burger/` определить переменную `DB_URL`:
+
+- `DB_URL` — `postgres://user:password@host:port/db_name`.
 
 ## Цели проекта
 
