@@ -162,6 +162,25 @@ Parcel будет следить за файлами в каталоге `bundle
 
 - `DB_URL` — `postgres://user:password@host:port/db_name`.
 
+В файле `star_burger/settings.py` раскомментируйте блок подключения к `postgresql`:
+```python
+DATABASES = {
+    'default': dj_database_url.config(
+        default=env('DB_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
+```
+и закомментируйте или удалите блок подключения к `sqlite3`:
+```python
+DATABASES = {
+    'default': dj_database_url.config(
+        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
+    )
+}
+```
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).
