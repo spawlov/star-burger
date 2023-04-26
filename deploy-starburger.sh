@@ -53,7 +53,7 @@ echo "Reloading Nginx..."
 systemctl reload nginx
 echo 'Nginx reloaded'
 echo "=================================================================="
-curl -X PATCH https://api.rollbar.com/api/1/deploy/$ROLLBAR_DEPLOY_ID?access_token=$ROLLBAR_ACCESS_TOKEN --data '{"status": "succeeded"}'
+curl -X PATCH https://api.rollbar.com/api/1/deploy/"$ROLLBAR_DEPLOY_ID"?access_token=$ROLLBAR_ACCESS_TOKEN --data '{"status": "succeeded"}'
 echo
 echo "=================================================================="
 echo 'Deploy completed'
