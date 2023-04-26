@@ -4,13 +4,11 @@ import dj_database_url
 
 from environs import Env
 
-
 env = Env()
 env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', False)
@@ -45,12 +43,15 @@ MIDDLEWARE = [
     'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
-ROLLBAR = {
-    'access_token': env('ROLLBAR_TOKEN'),
-    'environment': env('ROLLBAR_ENV', 'development'),
-    'code_version': '1.0',
-    'root': BASE_DIR,
-}
+ROLLBAR_TOKEN = env('ROLLBAR_TOKEN', None)
+
+if ROLLBAR_TOKEN:
+    ROLLBAR = {
+        'access_token': env('ROLLBAR_TOKEN'),
+        'environment': env('ROLLBAR_ENV', 'development'),
+        'code_version': '1.0',
+        'root': BASE_DIR,
+    }
 
 ROOT_URLCONF = 'star_burger.urls'
 
@@ -133,7 +134,6 @@ STATIC_URL = '/static/'
 INTERNAL_IPS = [
     '127.0.0.1'
 ]
-
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "assets"),
