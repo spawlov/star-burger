@@ -1,24 +1,24 @@
 #!/bin/bash
 set -e
 echo
-echo 'Starting deploy...'
-echo '=================================================================='
+echo "Starting deploy..."
+echo "=================================================================="
 cd /opt/StarBurger
 echo "Directory changed to $PWD"
-echo '=================================================================='
+echo "=================================================================="
 echo "Pull from repository..."
 git pull
 echo "Pull from repository completed."
 echo "=================================================================="
-GIT_SHA=$(git rev-parse HEAD)
+GIT_SHA=`git rev-parse HEAD`
 ROLLBAR_ACCESS_TOKEN=0df9740359ad4ce5ab85b6da18972849
 ENVIRONMENT=production
-ROLLBAR_DEPLOY_ID=$(curl https://api.rollbar.com/api/1/deploy/ \
+ROLLBAR_DEPLOY_ID=`curl https://api.rollbar.com/api/1/deploy/ \
                 --form access_token=$ROLLBAR_ACCESS_TOKEN \
                 --form environment=$ENVIRONMENT \
                 --form revision="$GIT_SHA" \
                 --form local_username="$USER" \
-                --form status=started | jq -r '.data.deploy_id')
+                --form status=started | jq -r '.data.deploy_id'`
 echo "=================================================================="
 echo "Activating venv..."
 source venv/bin/activate
@@ -51,9 +51,9 @@ echo "Restart Gunicorn completed."
 echo "=================================================================="
 echo "Reloading Nginx..."
 systemctl reload nginx
-echo 'Nginx reloaded'
+echo "Nginx reloaded."
 echo "=================================================================="
 curl -X PATCH https://api.rollbar.com/api/1/deploy/"$ROLLBAR_DEPLOY_ID"?access_token=$ROLLBAR_ACCESS_TOKEN --data '{"status": "succeeded"}'
 echo
 echo "=================================================================="
-echo 'Deploy completed'
+echo "Deploy completed."
