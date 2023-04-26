@@ -2,6 +2,8 @@
 
 Это сайт сети ресторанов Star Burger. Здесь можно заказать превосходные бургеры с доставкой на дом.
 
+##### Демоверсия сайта доступна по этой ссылке: [https://star-burger.s-pavlov.site/](https://star-burger.s-pavlov.site/)
+
 ![скриншот сайта](https://dvmn.org/filer/canonical/1594651635/686/)
 
 
