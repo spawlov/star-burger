@@ -12,7 +12,7 @@ echo "Pull from repository completed."
 echo "=================================================================="
 GIT_SHA=$(git rev-parse HEAD)
 ROLLBAR_ACCESS_TOKEN=0df9740359ad4ce5ab85b6da18972849
-ENVIRONMENT=development
+ENVIRONMENT=production
 ROLLBAR_DEPLOY_ID=$(curl https://api.rollbar.com/api/1/deploy/ \
                 --form access_token=$ROLLBAR_ACCESS_TOKEN \
                 --form environment=$ENVIRONMENT \
