@@ -51,7 +51,7 @@ curl https://api.rollbar.com/api/1/deploy/ \
     --form environment=$ENVIRONMENT \
     --form revision=$GIT_SHA \
     --form local_username=$USER \
-    --form status=succeeded #| jq -r '.data.deploy_id'
+    --form status=succeeded | jq -r '.data.deploy_id'
 echo "=================================================================="
 chmod g+x deploy.sh
 echo "Deploy completed."
