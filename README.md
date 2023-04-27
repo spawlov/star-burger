@@ -187,6 +187,33 @@ ROLLBAR_TOKEN=<Ваш токен>
 ```
 <hr>
 
+##### Автоматический деплой:
+
+Автоматический деплой производится запуском скрипта `deploy.sh` из корня проекта:
+```sh
+./deploy.sh
+```
+
+Если вы используете `Rollbar` - отредактируйте скрипт, а именно присвойте переменной значение своего токена иначе скрипт не будет сообщать о новом деплое в `Rollbar`:
+
+- ROLLBAR_ACCESS_TOKEN = Ваш токен `post_server_item`
+
+Скрипт осуществляет следующие действия:
+
+- Выполняет команду `git pull`
+- Активирует виртуальное окружение (если имя вашего виртуального окружения отличается от `venv` - отредактируйте `source venv/bin/activate`)
+- Обновляет зависимости - `pip install -r requirements.txt`
+- Обновляет библиотеки JS - `npm update`
+- Пересобирает фронтенд - `./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"`
+- Обновляет статику - `python manage.py collectstatic --noinput`
+- Применяет миграции - `python manage.py migrate`
+- Перзапускает `Gunicorn` и перезагружает `Nginx`
+- Если указан токен - отправит сообщение в `Rollbar`
+
+Скрипт завершает, если не возникло ошибок, работу сообщением `Deploy completed.`
+
+<hr>
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).
