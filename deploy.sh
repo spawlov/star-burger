@@ -44,8 +44,10 @@ systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
 ROLLBAR_ACCESS_TOKEN=0df9740359ad4ce5ab85b6da18972849
-if [[ ! -v ROLLBAR_ACCESS_TOKEN ]];
+if [[ -v ROLLBAR_ACCESS_TOKEN ]];
 then
+  :
+else
   GIT_SHA=`git rev-parse HEAD`
   ENVIRONMENT=production
   curl https://api.rollbar.com/api/1/deploy/ \
