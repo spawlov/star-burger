@@ -93,6 +93,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    print(undefined_test_variable)
     order_with_price = OrderListSerializer(
         Order.objects.get_order_price(), many=True
     )
