@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum, F
+from django.db.models import F, Sum
+
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -131,10 +132,7 @@ class OrderQuerySet(models.QuerySet):
         orders_with_price = (Order.objects
                              .prefetch_related('order_num__restaurant')
                              .filter(status__in=['WAITING', 'PROCESS'])
-                             .annotate(price=Sum(
-                                F('order_no__price') * F('order_no__quantity')
-                                )
-                                )
+                             .annotate(price=Sum(F('order_no__price') * F('order_no__quantity')))
                              .order_by('-status', 'pk')
                              )
         return orders_with_price

@@ -1,8 +1,10 @@
-import requests
+from django.conf import settings
+
 from geopy import distance
 
-from django.conf import settings
 from loguru import logger
+
+import requests
 
 
 def fetch_coordinates(apikey, address):

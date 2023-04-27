@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.shortcuts import reverse, redirect
+from django.shortcuts import redirect, reverse
 from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.encoding import iri_to_uri
@@ -8,9 +8,9 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .geocoder import calculate_distance
 from .models import Order
+from .models import OrderItem
 from .models import Product
 from .models import ProductCategory
-from .models import OrderItem
 from .models import Restaurant
 from .models import RestaurantMenuItem
 from .models import RestaurantOrder

@@ -1,8 +1,13 @@
 from rest_framework import serializers
 
 from .geocoder import calculate_distance
-from .models import Order, OrderItem, RestaurantOrder, RestaurantMenuItem, \
-    Restaurant
+from .models import (
+    Order,
+    OrderItem,
+    Restaurant,
+    RestaurantMenuItem,
+    RestaurantOrder,
+)
 
 
 class ProductOrderSerializer(serializers.ModelSerializer):
@@ -47,8 +52,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         result_restaurants = None
         for product in OrderItem.objects.filter(order=order):
             restaurants = list(RestaurantMenuItem.objects.filter(
-                            product_id=product.product_id, availability=True
-                            ).values_list('restaurant', flat=True))
+                product_id=product.product_id,
+                availability=True
+            ).values_list('restaurant', flat=True))
             if not result_restaurants:
                 result_restaurants = restaurants
             set_restaurants = set(result_restaurants).intersection(set(restaurants))
