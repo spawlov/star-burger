@@ -46,10 +46,11 @@ MIDDLEWARE = [
 ROLLBAR_TOKEN = env('ROLLBAR_TOKEN', None)
 
 if ROLLBAR_TOKEN:
+    CODE_VERSION = os.popen('git rev-parse HEAD').read()
     ROLLBAR = {
         'access_token': env('ROLLBAR_TOKEN'),
         'environment': env('ROLLBAR_ENV', 'development'),
-        'code_version': '1.0',
+        'code_version': CODE_VERSION,
         'root': BASE_DIR,
     }
 
