@@ -3,9 +3,6 @@ set -e
 echo
 echo "Starting deploy..."
 echo "=================================================================="
-cd /opt/StarBurger
-echo "Directory changed to "$PWD
-echo "=================================================================="
 echo "Pull from repository..."
 git pull
 echo "Pull from repository completed."
