@@ -152,7 +152,9 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ROLLBAR_TOKEN` — Ваш токен в Rollbar
 - `ROLLBAR_ENV` = установить в `production`
 <hr>
+
 ##### Переход на `postgresql`:
+
 Создать базу данных, создать пользователя с паролем и дать ему все привилегии для новой базы данных [Туториал по postgresql](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04).
 
 В файле `.env` в каталоге `star_burger/` определить переменную `DB_URL`:
@@ -174,7 +176,9 @@ DATABASES = {
 ```
 Если вы более не планируете использовать `sqlite3` - блок подклюдчения к этой БД можно удалить.
 <hr>
+
 ##### Добавление сервиса `Rollbar`:
+
 Зарегистрируйтесь на сайте [http://rollbar.com](http://rollbar.com) получите токен.
 Определите переменную окружения `ROLLBAR_TOKEN`. В файл `.env` добавить код:
 
