@@ -44,7 +44,7 @@ systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
 ROLLBAR_ACCESS_TOKEN=#0df9740359ad4ce5ab85b6da18972849
-if ROLLBAR_ACCESS_TOKEN != None
+if $ROLLBAR_ACCESS_TOKEN != None
 then
   GIT_SHA=`git rev-parse HEAD`
   ENVIRONMENT=production
