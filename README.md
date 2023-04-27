@@ -61,12 +61,6 @@ pip install -r requirements.txt
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
 
-Зарегистрируйтесь на сайте [http://rollbar.com](http://rollbar.com) получите токен.
-Определите переменную окружения `ROLLBAR_TOKEN`. В файл `.env` добавить код:
-```sh
-ROLLBAR_TOKEN=<Ваш токен>
-```
-
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
 ```sh
@@ -157,31 +151,37 @@ Parcel будет следить за файлами в каталоге `bundle
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `ROLLBAR_TOKEN` — Ваш токен в Rollbar
 - `ROLLBAR_ENV` = установить в `production`
-
-Переход на `postgresql`: создать базу данных, создать пользователя с паролем и дать ему все привилегии для новой базы данных [Туториал по postgresql](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04).
+<hr>
+##### Переход на `postgresql`:
+Создать базу данных, создать пользователя с паролем и дать ему все привилегии для новой базы данных [Туториал по postgresql](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04).
 
 В файле `.env` в каталоге `star_burger/` определить переменную `DB_URL`:
 
 - `DB_URL` — `postgres://user:password@host:port/db_name`.
 
-В файле `star_burger/settings.py` раскомментируйте блок подключения к `postgresql`:
+В файле `star_burger/settings.py`, блоке подключение к `sqlite3` измените значение `default` на любое другое (например `notused`), а в блоке `postgresql` - измените значение `second` на `default`:
 ```python
 DATABASES = {
     'default': dj_database_url.config(
+        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
+    ),
+    'second': dj_database_url.config(
         default=env('DB_URL'),
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
 ```
-и закомментируйте или удалите блок подключения к `sqlite3`:
-```python
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
-    )
-}
+Если вы более не планируете использовать `sqlite3` - блок подклюдчения к этой БД можно удалить.
+<hr>
+##### Добавление сервиса `Rollbar`:
+Зарегистрируйтесь на сайте [http://rollbar.com](http://rollbar.com) получите токен.
+Определите переменную окружения `ROLLBAR_TOKEN`. В файл `.env` добавить код:
+
+```sh
+ROLLBAR_TOKEN=<Ваш токен>
 ```
+<hr>
 
 ## Цели проекта
 
