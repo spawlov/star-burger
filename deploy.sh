@@ -16,7 +16,7 @@ pip install -r requirements.txt
 echo "Requirements updated."
 echo "=================================================================="
 echo "Updating Node.js packages..."
-npm update
+npm ci
 npm audit fix
 echo "Node.js packages updated."
 echo "=================================================================="
