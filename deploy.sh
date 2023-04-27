@@ -43,8 +43,10 @@ echo "Reloading Nginx..."
 systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
-#ROLLBAR_ACCESS_TOKEN= #0df9740359ad4ce5ab85b6da18972849
-if [[ -v $ROLLBAR_ACCESS_TOKEN ]];
+# Specify the value of your "post_server_item" token from Rollbar in the value of the ROLLBAR_TOKEN variable
+ROLLBAR_ACCESS_TOKEN=
+# 0df9740359ad4ce5ab85b6da18972849
+if [[ -z $ROLLBAR_ACCESS_TOKEN ]];
 then
   :
 else
