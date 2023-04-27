@@ -43,15 +43,18 @@ echo "Reloading Nginx..."
 systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
-GIT_SHA=`git rev-parse HEAD`
-ROLLBAR_ACCESS_TOKEN=0df9740359ad4ce5ab85b6da18972849
-ENVIRONMENT=production
-curl https://api.rollbar.com/api/1/deploy/ \
-    --form access_token=$ROLLBAR_ACCESS_TOKEN \
-    --form environment=$ENVIRONMENT \
-    --form revision=$GIT_SHA \
-    --form local_username=$USER \
-    --form status=succeeded | jq -r '.data.deploy_id'
-echo "=================================================================="
+ROLLBAR_ACCESS_TOKEN=#0df9740359ad4ce5ab85b6da18972849
+if ROLLBAR_ACCESS_TOKEN != None
+then
+  GIT_SHA=`git rev-parse HEAD`
+  ENVIRONMENT=production
+  curl https://api.rollbar.com/api/1/deploy/ \
+      --form access_token=$ROLLBAR_ACCESS_TOKEN \
+      --form environment=$ENVIRONMENT \
+      --form revision=$GIT_SHA \
+      --form local_username=$USER \
+      --form status=succeeded | jq -r '.data.deploy_id'
+  echo "=================================================================="
+fi
 chmod g+x deploy.sh
 echo "Deploy completed."
