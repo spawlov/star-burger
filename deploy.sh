@@ -15,18 +15,18 @@ echo "Updating requirements..."
 pip install -r requirements.txt
 echo "Requirements updated."
 echo "=================================================================="
-echo "Updating Node.js packges..."
+echo "Updating Node.js packages..."
 npm update
 npm audit fix
 echo "Node.js packages updated."
 echo "=================================================================="
 echo "Rebuilding frontend..."
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
-echo "Frontend rebuilded."
+echo "Frontend rebuild."
 echo "=================================================================="
-echo "Rebuiding staticfiles..."
+echo "Rebuilding staticfiles..."
 python manage.py collectstatic --noinput
-echo "Staticfiles rebuilded."
+echo "Staticfiles rebuild."
 echo "=================================================================="
 echo "Migrations are applied..."
 python manage.py migrate
@@ -34,7 +34,7 @@ echo "Migrations completed."
 echo "=================================================================="
 echo "Restarting Gunicorn..."
 systemctl restart starburger
-echo "Restart Gunicorn copleted."
+echo "Restart Gunicorn completed."
 echo "=================================================================="
 echo "Reloading Nginx..."
 systemctl reload nginx
