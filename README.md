@@ -58,6 +58,7 @@ pip install -r requirements.txt
 
 Определите переменную окружения `SECRET_KEY`. Создать файл `.env` в каталоге `star_burger/` и положите туда такой код:
 ```sh
+DEBUG=True
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
 
@@ -149,8 +150,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `DEBUG` — дебаг-режим. Поставьте `False`.
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
-- `ROLLBAR_TOKEN` — Ваш токен в Rollbar
-- `ROLLBAR_ENV` = установить в `production`
+
 <hr>
 
 ##### Переход на `postgresql`:
@@ -177,14 +177,14 @@ DATABASES = {
 Если вы более не планируете использовать `sqlite3` - блок подклюдчения к этой БД можно удалить.
 <hr>
 
-##### Добавление сервиса `Rollbar`:
+##### Добавление сервиса `Rollbar` (опционально):
 
 Зарегистрируйтесь на сайте [http://rollbar.com](http://rollbar.com) получите токен.
 Определите переменную окружения `ROLLBAR_TOKEN`. В файл `.env` добавить код:
 
-```sh
-ROLLBAR_TOKEN=<Ваш токен>
-```
+- `ROLLBAR_TOKEN` — Ваш токен в Rollbar
+- `ROLLBAR_ENV` = установить в `production` (если это Prod весия, иначе можно не устаналивать)
+
 <hr>
 
 ##### Автоматический деплой:
@@ -210,7 +210,7 @@ ROLLBAR_TOKEN=<Ваш токен>
 - Перзапускает `Gunicorn` и перезагружает `Nginx`
 - Если указан токен - отправит сообщение в `Rollbar`
 
-Скрипт завершает, если не возникло ошибок, работу сообщением `Deploy completed.`
+Скрипт завершает свою работу, если не возникло ошибок, сообщением `Deploy completed.`
 
 <hr>
 
