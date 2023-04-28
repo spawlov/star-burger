@@ -44,7 +44,7 @@ ROLLBAR_TOKEN=$(grep ROLLBAR_TOKEN .env)
 ROLLBAR_ACCESS_TOKEN=${ROLLBAR_TOKEN##*"="}
 if [[ -z $ROLLBAR_ACCESS_TOKEN ]];
 then
-  :
+  echo "ROLLBAR_TOKEN not set"
 else
   GIT_SHA=`git rev-parse HEAD`
   ENVIRONMENT=production
