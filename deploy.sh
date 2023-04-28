@@ -40,7 +40,7 @@ echo "Reloading Nginx..."
 systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
-set +e && ROLLBAR_TOKEN=$(grep ROLLBAR_TOKEN .env) && set -e
+set +e && ROLLBAR_TOKEN=$(grep "ROLLBAR_TOKEN" .env) && set -e
 ROLLBAR_ACCESS_TOKEN=${ROLLBAR_TOKEN##*"="}
 if [[ -z $ROLLBAR_ACCESS_TOKEN ]];
 then
