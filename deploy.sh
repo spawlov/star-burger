@@ -40,19 +40,19 @@ echo "Reloading Nginx..."
 systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
-ROLLBAR_TOKEN=`grep ROLLBAR_TOKEN .env`
+set +e && ROLLBAR_TOKEN=$(grep ROLLBAR_TOKEN .env) && set -e
 ROLLBAR_ACCESS_TOKEN=${ROLLBAR_TOKEN##*"="}
 if [[ -z $ROLLBAR_ACCESS_TOKEN ]];
 then
   echo "ROLLBAR_TOKEN not set"
 else
-  GIT_SHA=`git rev-parse HEAD`
+  GIT_SHA=$(git rev-parse HEAD)
   ENVIRONMENT=production
   curl https://api.rollbar.com/api/1/deploy/ \
-      --form access_token=$ROLLBAR_ACCESS_TOKEN \
+      --form access_token="$ROLLBAR_ACCESS_TOKEN" \
       --form environment=$ENVIRONMENT \
-      --form revision=$GIT_SHA \
-      --form local_username=$USER \
+      --form revision="$GIT_SHA" \
+      --form local_username="$USER" \
       --form status=succeeded | jq -r '.data.deploy_id'
   echo "=================================================================="
 fi
