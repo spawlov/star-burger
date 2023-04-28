@@ -29,7 +29,7 @@ python manage.py collectstatic --noinput
 echo "Staticfiles rebuild."
 echo "=================================================================="
 echo "Migrations are applied..."
-python manage.py migrate
+python manage.py migrate --nodeinput
 echo "Migrations completed."
 echo "=================================================================="
 echo "Restarting Gunicorn..."
