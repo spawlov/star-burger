@@ -214,6 +214,133 @@ DATABASES = {
 
 <hr>
 
+## Как запустить проект в docker
+
+### dev - версия на локальном компьютере
+
+Проверьте, что у вас установлен `docker` и `docker-compose`:
+
+```sh
+docker --version
+docker-compose --version
+```
+Если нет, установите его - подробно, как скачать и установить `docker` на любую систему, смотрите на официальном сайте: [https://www.docker.com/](https://www.docker.com/)
+
+Создайте файл `.env` содержащий:
+
+```shell-session
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1
+SECRET_KEY=<Secret KEY fo Django>
+GEO_API_KEY=<GEO API KEY from Yandex>
+ROLLBAR_TOKEN=<Rollbar Token - post_server_item>
+
+POSTGRES_DB=<django_db>
+POSTGRES_USER=<django_user>
+POSTGRES_PASSWORD=<django_password>
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+```
+
+Запустите сборку образов проекта командой:
+
+```sh
+docker-compose -f docker-compose.yml -d --build
+```
+
+Затем сделайте миграции:
+
+```sh
+docker-compose -f docker-compose.yml exec web python manage.py migrate --noinput
+```
+
+После окончания сборки проекта, сайт будет доступен по адресу `http://localhoct`
+
+### prod - версия на сервере
+
+Создайте образ Node.Js + Django и загрузите его на Docker Hub
+
+```shell
+docker build -t <Login for Docker Hub>/<Name your repo> .
+docker login
+docker push <Login for Docker Hub>/<Name your repo>
+```
+
+На сервере создайте файл `.env` с указанным выше содержимым (измените только значение `ALLOWED_HOSTS` в соответствии с IP-адресом вашего сервера) и скопируйте файл `nginx.conf`,
+
+Создайте файл `docker-compose.yml`:
+
+```shell-session
+version: '3.8'
+
+services:
+  web:
+    image: spawlov/starburger:latest
+    command: gunicorn star_burger.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    env_file:
+      - ./.env
+    expose:
+      - 8000
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  db:
+    image: postgres:14.2
+    volumes:
+      - ./db/star-burger/data:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "80:80"
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  static_volume:
+  media_volume:
+
+```
+
+Запустите сборку проекта
+
+```sh
+docker-compose -f docker-compose.yml -d --build
+```
+
+Затем сделайте миграции:
+
+```sh
+docker-compose -f docker-compose.yml exec web python manage.py migrate --noinput
+```
+
+После окончания сборки проекта, сайт будет доступен по адресу `http://<IP-фдрес вашего сервера>`
+
+<hr>
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).

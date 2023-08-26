@@ -145,3 +145,4 @@ cython_debug/
 /staticfiles/
 /package.json
 /package-lock.json
+/star-burger.json
