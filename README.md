@@ -275,7 +275,7 @@ version: '3.8'
 
 services:
   web:
-    image: spawlov/starburger:latest
+    image: <Login for Docker Hub>/<Name your repo>
     command: gunicorn star_burger.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/app/staticfiles
