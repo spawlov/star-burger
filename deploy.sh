@@ -33,11 +33,11 @@ python manage.py migrate --noinput
 echo "Migrations completed."
 echo "=================================================================="
 echo "Restarting Gunicorn..."
-systemctl restart starburger.service
+sudo systemctl restart starburger.service
 echo "Restart Gunicorn completed."
 echo "=================================================================="
 echo "Reloading Nginx..."
-systemctl reload nginx
+sudo systemctl reload nginx
 echo "Nginx reloaded"
 echo "=================================================================="
 set +e && ROLLBAR_TOKEN=$(grep "ROLLBAR_TOKEN" .env) && set -e
