@@ -33,7 +33,7 @@ python manage.py migrate --noinput
 echo "Migrations completed."
 echo "=================================================================="
 echo "Restarting Gunicorn..."
-systemctl restart starburger
+systemctl restart starburger.service
 echo "Restart Gunicorn completed."
 echo "=================================================================="
 echo "Reloading Nginx..."
